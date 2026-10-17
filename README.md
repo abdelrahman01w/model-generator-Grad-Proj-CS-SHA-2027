@@ -1,6 +1,11 @@
-conda create -n model_generator_demo python=3.14.8
+# First create your env
+`conda create -n model_generator_demo python=3.14.8`
 
-conda activate model_generator_demo
+# Then activate it 
+`conda activate model_generator_demo`
 
-python -m src
-pip install -r requirements.txt
+# install libraries 
+`pip install -r requirements.txt`
+
+# Run __main__.py
+`python -m src`
