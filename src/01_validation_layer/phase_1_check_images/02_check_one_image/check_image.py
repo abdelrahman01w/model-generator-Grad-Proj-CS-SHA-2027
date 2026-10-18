@@ -3,6 +3,7 @@ import json
 import cv2 as cv
 from collections import defaultdict
 from PIL import Image
+import numpy as np
 
 # Read all images
 
@@ -394,6 +395,117 @@ def verify_images_resolution(size_passed_classes):
     print("========================================")
     return final_clean_dict
 
+# Verifiy aspect ratio 
+
+def verify_images_aspect_ratio(resolution_passed_classes):
+    print("\n==================================================")
+    print("      Check ASPECT RATIO VALIDATION            ")
+    print("      (Aspect ratio must not exceed 3:1)          ")
+    print("==================================================")
+
+    if not resolution_passed_classes:
+        print("No classes provided for aspect ratio validation.")
+        return {}
+
+    final_clean_dict = defaultdict(list)
+    accepted_ar_count = 0
+    rejected_ar_count = 0
+
+    for class_name, img_paths in resolution_passed_classes.items():
+        print(f"\n Checking aspect ratios for [{class_name}]...")
+        for img_path in img_paths:
+            file_name = os.path.basename(img_path)
+            
+            try:
+                with Image.open(img_path) as img:
+                    width, height = img.size
+                    max_dim = max(width, height)
+                    min_dim = min(width, height)
+                    # Calculating the aspect ratio (the longer side to the shorter side)
+                    aspect_ratio = max_dim / min_dim
+
+                    # if aspect ratio above 3:1 --> reject
+                    if aspect_ratio > 3.0:
+                        rejected_ar_count += 1
+                        print(f"  REJECTED: {file_name} -> Aspect ratio {max_dim}:{min_dim} ({aspect_ratio:.2f}:1 > 3:1)")
+                        continue
+                    # accepted
+                    final_clean_dict[class_name].append(img_path)
+                    accepted_ar_count += 1
+                    print(f"  Aspect Ratio Accepted: {file_name} [{width}x{height}, Ratio: {aspect_ratio:.2f}:1]")
+            except Exception as e:
+                rejected_ar_count += 1
+                print(f"  ERROR checking aspect ratio for {file_name} -> Reason: {str(e)}")
+    print("\n========================================")
+    print("      FINAL ASPECT RATIO REPORT         ")
+    print("========================================")
+    print(f"Final Clean Images Accepted : {accepted_ar_count}")
+    print(f"Images Rejected (> 3:1 AR)  : {rejected_ar_count}")
+    print("========================================")
+
+    return final_clean_dict
+
+# 6. check 	Blank image: pixel variation almost zero (all black, all white, one flat color)
+
+def verify_images_pixel_variation(aspect_ratio_passed_classes):
+    print("\n==================================================")
+    print("      CHECK PIXEL VARIATION / BLANK CHECK      ")
+    print("      (Rejecting flat color, all black, white)    ")
+    print("==================================================")
+
+    if not aspect_ratio_passed_classes:
+        print("No classes provided for pixel variation validation.")
+        return {}
+
+    final_clean_dict = defaultdict(list)
+    accepted_pixel_count = 0
+    rejected_pixel_count = 0
+
+    # (Standard Deviation Threshold)
+    # If it is less than 1.0, it means the image is nearly identical in terms of its pixels (consisting of a single color or being almost empty).
+
+    STD_THRESHOLD = 1.0
+
+    for class_name, img_paths in aspect_ratio_passed_classes.items():
+        print(f"\n Checking pixel variations for [{class_name}]...")
+
+        for img_path in img_paths:
+            file_name = os.path.basename(img_path)
+
+            try: 
+                # Reading an image in grayscale using OpenCV to examine pixel contrast
+                gray_img = cv.imread(img_path, cv.IMREAD_GRAYSCALE)
+
+                if gray_img is None:
+                    rejected_pixel_count += 1
+                    print(f"  REJECTED: {file_name} -> Reason: Could not load for pixel check")
+                    continue
+                # Calculating the Standard Deviation of Pixels
+                pixel_std = np.std(gray_img)
+
+                # If the contrast is non-existent or nearly non-existent (a black or white image, or a solid, flat color)
+                if pixel_std < STD_THRESHOLD:
+                    rejected_pixel_count += 1
+                    print(f"  REJECTED: {file_name} -> Reason: Blank or flat color image (Pixel Std Dev: {pixel_std:.2f} < {STD_THRESHOLD})")
+                    continue
+
+                # success
+                final_clean_dict[class_name].append(img_path)
+                accepted_pixel_count += 1
+                print(f"  Clean & Accepted: {file_name} [Std Dev: {pixel_std:.2f}]")
+
+            except Exception as e:
+                rejected_pixel_count += 1
+                print(f"  ERROR checking pixel variation for {file_name} -> Reason: {str(e)}")
+    print("\n========================================")
+    print("     FINAL PIXEL VARIATION REPORT       ")
+    print("========================================")
+    print(f"Final Clean Images Accepted : {accepted_pixel_count}")
+    print(f"Images Rejected (Blank/Flat): {rejected_pixel_count}")
+    print("========================================")
+    return final_clean_dict
+
+
 if __name__ == "__main__":
     passed_classes_check_1 = analyze_and_validate_classes()
     if passed_classes_check_1:
@@ -405,7 +517,15 @@ if __name__ == "__main__":
             if passed_img_size_cechk3:
                 
                 passed_img_shorter_side_cechk4 = verify_images_resolution(passed_img_size_cechk3)
-        print("\n Pipeline Completed Successfully!")
+        
+                if passed_img_shorter_side_cechk4:
+
+                    passed_aspect_ratio_ceck5 = verify_images_aspect_ratio(passed_img_shorter_side_cechk4)
+                    
+                    if passed_aspect_ratio_ceck5:
+                        
+                        final_dataset_dict = verify_images_pixel_variation(passed_aspect_ratio_ceck5)
+        print("\n Full Pipeline Completed Successfully!")
         print(" Final dataset dictionary is ready in memory:")
         for c_name, paths in passed_img_size_cechk3.items():
             print(f"Class '{c_name}' has {len(paths)} ready-to-use images.")
