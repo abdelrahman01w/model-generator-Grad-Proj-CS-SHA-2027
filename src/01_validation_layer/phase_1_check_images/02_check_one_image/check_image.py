@@ -2,6 +2,7 @@ import os
 import json
 import cv2 as cv
 from collections import defaultdict
+from PIL import Image
 
 # Read all images
 
@@ -150,17 +151,19 @@ def analyze_and_validate_classes():
     if not os.path.exists(config_filepath):
         print(f"Error: Config file not found at: {config_filepath}")
         print("Please run your setup script first to generate the directories configuration!")
-        return
+        return None
+    
     with open(config_filepath , "r" , encoding="utf-8") as f:
         stored_dirs=json.load(f)
 
     if not stored_dirs:
         print("The configuration file is empty!")
-        return
+        return None
     print(f"Found {len(stored_dirs)} classes in the configuration file. Starting validation based on content...\n")
 
     # allowed extension
     allowed_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.webp')
+    validated_dirs = {}
 
     # some info about files
     global_accepted_count = 0
@@ -171,9 +174,10 @@ def analyze_and_validate_classes():
         print(f"=" * 50)
         print(f"Processing -> [{class_name}] at: {class_path}")
         print(f"=" * 50)
+
         if not os.path.isdir(class_path):
             print(f"REJECTED CLASS: [{class_name}] - Reason: The directory path does not exist.\n")
-
+            continue
         all_files = os.listdir(class_path)
         
         # image_candidates --> store img's_name which exist in path
@@ -216,10 +220,11 @@ def analyze_and_validate_classes():
             print(f" Class [{class_name}] Status: PASSED")
             print(f" - Accepted Images: {len(class_accepted_images)}")
             global_accepted_count += len(class_accepted_images)
+            validated_dirs[class_name] = class_path
 
         # report for rejected files
         if class_rejected_files:
-            print(f"\n  ⚠️ Rejected Files Report for [{class_name}]:")
+            print(f"\n  Rejected Files Report for [{class_name}]:")
             for rej_file, reason in class_rejected_files.items():
                 print(f"    - '{rej_file}' -> Reason: {reason}")
                 global_rejected_count += 1
@@ -228,6 +233,7 @@ def analyze_and_validate_classes():
 
         print("\n")
 
+
     # A Genral report
     print("========================================")
     print("       FINAL CONTENT VALIDATION REPORT  ")
@@ -235,9 +241,64 @@ def analyze_and_validate_classes():
     print(f"Total Accepted Images : {global_accepted_count}")
     print(f"Total Rejected Files  : {global_rejected_count}")
     print("========================================")
+    return validated_dirs
+
+# verify_images_deep_integrity
+
+def verify_images_deep_integrity(validated_dirs) :
+    """
+    Examine the accepted images to ensure they can be fully opened and decoded 
+    (detecting truncated or internally corrupted images).
+    """
+    print("========================================")
+    print("       DEEP INTEGRITY  ")
+    print(" (Checking for Truncated/Corrupted) ")
+    print("========================================")
+
+    if not validated_dirs:
+        print("No classes passed Layer 1 to perform deep integrity check.")
+        return {}
+
+    fully_validated_classes = defaultdict(list)
+    fully_valid_count = 0
+    corrupted_or_truncated_count = 0
+
+    for class_name,class_path in validated_dirs.items():
+        print(f"\n Deep Checking [{class_name}]...")
+
+        images_files = [
+            f for f in os.listdir(class_path) if os.path.isfile(os.path.join(class_path,f))
+        ]
+
+        for file_name in images_files:
+            img_path = os.path.join(class_path, file_name)
+            # Using Pillow to open and fully decode an image (calling `load()` forces the actual decoding of the data)
+            try:
+                with Image.open(img_path) as img :
+                    img.load() # Forcing Pillow to read image data and decode it into pixel data
+                fully_validated_classes[class_name].append(img_path)
+                print(f"  Fully Decoded & Valid: {file_name}")
+                fully_valid_count += 1  
+            except(IOError , SyntaxError,OSError): 
+                # IOError --> error in read img daya
+                # SyntaxError -->problem in archticture of img
+                # OSError --> error in file or less data
+                corrupted_or_truncated_count += 1
+                print(f"  TRUNCATED/CORRUPTED REJECTED: {file_name} -> Reason: {str(e)}")
+            except Exception as e :
+                corrupted_or_truncated_count += 1
+                print(f"  ERROR DECODING: {file_name} -> Reason: {str(e)}")
+    print("\n========================================")
+    print("       FINAL DEEP INTEGRITY REPORT      ")
+    print("========================================")
+    print(f"Fully Valid & Intact Images : {fully_valid_count}")
+    print(f"Truncated / Corrupted Files : {corrupted_or_truncated_count}")
+    print("========================================")
+
+    return fully_validated_classes
+
 
 '''
-
 if __name__ == "__main__":
 
     current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -258,6 +319,12 @@ if __name__ == "__main__":
         print(f"Error: Config file not found at: {config_filepath}")
 '''
 
-if __name__ == "__main__":
-    analyze_and_validate_classes()
 
+
+if __name__ == "__main__":
+    passed_classes = analyze_and_validate_classes()
+    if passed_classes:
+        clean_images_dict = verify_images_deep_integrity(passed_classes)
+        print(" Ready to proceed with clean data!")
+        for c_name, paths in clean_images_dict.items():
+            print(f"Class '{c_name}' has {len(paths)} ready-to-use images.")
