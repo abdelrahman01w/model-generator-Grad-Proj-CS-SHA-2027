@@ -297,34 +297,66 @@ def verify_images_deep_integrity(validated_dirs) :
 
     return fully_validated_classes
 
+def verfiy_images_size(deep_checked_classes):
+    print("\n========================================")
+    print("      CHECK IMAGE SIZE VALIDATION    ")
+    print("      (Checking 0 bytes & > 20MB)       ")
+    print("========================================")
 
-'''
+    if not deep_checked_classes:
+        print("No classes provided for size validation.")
+        return{}
+
+    final_clean_class = defaultdict(list)
+    accepted_size_count = 0
+    rejected_size_count = 0
+
+    MAX_SIZE_BYTES = 20 * 1024*1024
+
+    for class_name, img_paths in deep_checked_classes.items():
+        print(f"\n Checking sizes for [{class_name}]...")
+
+        for img_path in img_paths:
+            file_name = os.path.basename(img_path)
+
+            try: 
+                file_size_bytes=os.path.getsize(img_path) # get size by kb
+                file_size_mb = file_size_bytes/ (1024*1024) # convert size by mb
+
+                # first condition "reject file if it = 0 mb"
+                if file_size_bytes ==0:
+                    rejected_size_count += 1
+                    print(f" REJECTED: {file_name} -> Reason: File size is 0 bytes (Empty file)")
+                    continue
+
+                # first condition "reject file if it greater than > 20 mb"
+
+                if file_size_bytes > MAX_SIZE_BYTES:
+                    rejected_size_count += 1
+                    print(f" REJECTED: {file_name} -> Reason: File size is too large ({file_size_mb:.2f} MB > 20 MB)")
+                    continue
+                final_clean_class[class_name].append(img_path)
+                accepted_size_count += 1
+                print(f"  Size Accepted: {file_name} [{file_size_mb:.2f} MB]")
+            except Exception as e:
+                rejected_size_count += 1
+                print(f"  ERROR checking size for {file_name} -> Reason: {str(e)}")
+    print("\n========================================")
+    print("        FINAL SIZE VALIDATION REPORT    ")
+    print("========================================")
+    print(f"Images Passed Size Check : {accepted_size_count}")
+    print(f"Images Rejected by Size  : {rejected_size_count}")
+    print("========================================")
+    return final_clean_class
+
+
 if __name__ == "__main__":
+    passed_classes_check_1 = analyze_and_validate_classes()
+    if passed_classes_check_1:
 
-    current_script_path = os.path.dirname(os.path.abspath(__file__))
-    project_route = current_script_path
-    for _ in range(4):
-        project_route = os.path.dirname(project_route)
-
-    config_filepath = os.path.join(project_route,"assets","classes_config.json")
-    if os.path.exists(config_filepath):
-        with open(config_filepath, "r", encoding="utf-8") as f:
-            stored_dirs = json.load(f)
-        if stored_dirs:
-            # Run function
-            analyze_and_count_img_extension(stored_dirs)
-        else:
-            print("The configuration file is empty!")
-    else:
-        print(f"Error: Config file not found at: {config_filepath}")
-'''
-
-
-
-if __name__ == "__main__":
-    passed_classes = analyze_and_validate_classes()
-    if passed_classes:
-        clean_images_dict = verify_images_deep_integrity(passed_classes)
-        print(" Ready to proceed with clean data!")
-        for c_name, paths in clean_images_dict.items():
+        passed_img_opened_check2 = verify_images_deep_integrity(passed_classes_check_1)
+        if passed_img_opened_check2:
+            passed_img_size_cechk3 = verfiy_images_size(passed_img_opened_check2)
+        
+        for c_name, paths in passed_img_size_cechk3.items():
             print(f"Class '{c_name}' has {len(paths)} ready-to-use images.")
