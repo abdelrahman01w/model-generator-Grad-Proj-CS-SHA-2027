@@ -67,7 +67,6 @@ def analyze_and_count_img_extension(stored_dirs):
     A function to inspect all class folders, read the images,
     count the number of files for each format (extension), and tally the total.
     '''
-
     # dictionary to store number of image for each extension
     extension_count= defaultdict(int)
 
@@ -134,6 +133,111 @@ def analyze_and_count_img_extension(stored_dirs):
         print("========================================")
 
     return extension_count, extension_files
+
+
+def analyze_and_validate_classes():
+
+    # get config_file and project route
+    current_script_path = os.path.dirname(os.path.abspath(__file__))
+
+    project_route = current_script_path
+
+    for _ in range(4):
+        project_route=os.path.dirname(project_route)
+
+    config_filepath = os.path.join(project_route , "assets" , "classes_config.json")
+
+    if not os.path.exists(config_filepath):
+        print(f"Error: Config file not found at: {config_filepath}")
+        print("Please run your setup script first to generate the directories configuration!")
+        return
+    with open(config_filepath , "r" , encoding="utf-8") as f:
+        stored_dirs=json.load(f)
+
+    if not stored_dirs:
+        print("The configuration file is empty!")
+        return
+    print(f"Found {len(stored_dirs)} classes in the configuration file. Starting validation based on content...\n")
+
+    # allowed extension
+    allowed_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.webp')
+
+    # some info about files
+    global_accepted_count = 0
+    global_rejected_count = 0
+
+    # catch each class
+    for class_name,class_path in stored_dirs.items():
+        print(f"=" * 50)
+        print(f"Processing -> [{class_name}] at: {class_path}")
+        print(f"=" * 50)
+        if not os.path.isdir(class_path):
+            print(f"REJECTED CLASS: [{class_name}] - Reason: The directory path does not exist.\n")
+
+        all_files = os.listdir(class_path)
+        
+        # image_candidates --> store img's_name which exist in path
+        image_candidates = [
+            f for f in all_files if os.path.isfile(os.path.join(class_path, f))
+            ]
+        
+        if not image_candidates:
+            print(f"REJECTED CLASS: [{class_name}] - Reason: The directory is completely empty.\n")
+            continue
+        class_accepted_images = []
+        class_rejected_files = {} # store file name with reason
+
+        for filename in image_candidates:
+            img_path  = os.path.join(class_path,filename)
+            ext = os.path.splitext(filename)[1].lower()
+
+            # Rule 1 : check from  extension with reject and reason for rejection
+            if ext not in allowed_extensions:
+                class_rejected_files[filename] =f"Invalid extension '{ext}' (Not allowed)"
+                continue
+
+            # Rule 2 : check from content (Content-based verification) using opencv
+            try:
+                img=cv.imread(img_path)
+                if img is None:
+                    class_rejected_files[filename] = "Corrupted file or content is not a valid image format"
+                else:
+                    class_accepted_images.append(filename)
+                    print(f" Accepted: {filename} [{ext.upper()}]")
+            except Exception as e:
+                class_rejected_files[filename] = f"Error reading file content: {str(e)}"
+        
+        print("-" * 50)
+
+        if len(class_accepted_images) == 0:
+            print(f"REJECTED CLASS: [{class_name}]")
+            print(f"Reason: All files in this class were rejected!")
+        else:
+            print(f" Class [{class_name}] Status: PASSED")
+            print(f" - Accepted Images: {len(class_accepted_images)}")
+            global_accepted_count += len(class_accepted_images)
+
+        # report for rejected files
+        if class_rejected_files:
+            print(f"\n  ⚠️ Rejected Files Report for [{class_name}]:")
+            for rej_file, reason in class_rejected_files.items():
+                print(f"    - '{rej_file}' -> Reason: {reason}")
+                global_rejected_count += 1
+        else:
+            print(f"  - No rejected files in this class.")
+
+        print("\n")
+
+    # A Genral report
+    print("========================================")
+    print("       FINAL CONTENT VALIDATION REPORT  ")
+    print("========================================")
+    print(f"Total Accepted Images : {global_accepted_count}")
+    print(f"Total Rejected Files  : {global_rejected_count}")
+    print("========================================")
+
+'''
+
 if __name__ == "__main__":
 
     current_script_path = os.path.dirname(os.path.abspath(__file__))
@@ -146,9 +250,14 @@ if __name__ == "__main__":
         with open(config_filepath, "r", encoding="utf-8") as f:
             stored_dirs = json.load(f)
         if stored_dirs:
-            # تشغيل الدالة والحصول على التقرير مباشرة
+            # Run function
             analyze_and_count_img_extension(stored_dirs)
         else:
             print("The configuration file is empty!")
     else:
         print(f"Error: Config file not found at: {config_filepath}")
+'''
+
+if __name__ == "__main__":
+    analyze_and_validate_classes()
+
