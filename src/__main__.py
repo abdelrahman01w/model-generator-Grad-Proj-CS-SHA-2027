@@ -1,5 +1,6 @@
 import os
-import json 
+import json
+import sys
 # Get classes from user 
 
 def get_class_directories():
