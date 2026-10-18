@@ -349,14 +349,63 @@ def verfiy_images_size(deep_checked_classes):
     print("========================================")
     return final_clean_class
 
+# 	Shorter side below 64 px ==> Reject
+
+def verify_images_resolution(size_passed_classes):
+    print("\n==================================================")
+    print("         CHAECK RESOLUTION     ")
+    print("      (Shorter side must be >= 64 pixels)         ")
+    print("==================================================")
+
+    if not size_passed_classes:
+        print("No classes provided for resolution validation.")
+        return {}
+    
+    final_clean_dict = defaultdict(list)
+    accepted_res_count = 0
+    rejected_res_count = 0
+
+    for class_name, img_paths in size_passed_classes.items():
+        print(f"\n Checking resolutions for [{class_name}]...")
+        for img_path in img_paths:
+            file_name = os.path.basename(img_path)
+            try:
+                with Image.open(img_path) as img:
+                    width, height = img.size
+                    shorter_side = min(width, height)
+
+                    # if shorter_side img less than 64 px --> rejected
+                    if shorter_side < 64:
+                        rejected_res_count += 1
+                        print(f"   REJECTED: {file_name} -> Resolution {width}x{height} (Shorter side {shorter_side}px < 64px)")
+                        continue
+                    # success
+                    final_clean_dict[class_name].append(img_path)
+                    accepted_res_count += 1
+                    print(f"   Accepted: {file_name} [{width}x{height}px]")
+            except Exception as e:
+                rejected_res_count += 1
+                print(f"  ERROR checking resolution for {file_name} -> Reason: {str(e)}")
+    print("\n========================================")
+    print("      FINAL RESOLUTION REPORT           ")
+    print("========================================")
+    print(f"Images Accepted in Dictionary : {accepted_res_count}")
+    print(f"Images Rejected (< 64px)      : {rejected_res_count}")
+    print("========================================")
+    return final_clean_dict
 
 if __name__ == "__main__":
     passed_classes_check_1 = analyze_and_validate_classes()
     if passed_classes_check_1:
-
         passed_img_opened_check2 = verify_images_deep_integrity(passed_classes_check_1)
+        
         if passed_img_opened_check2:
             passed_img_size_cechk3 = verfiy_images_size(passed_img_opened_check2)
-        
+            
+            if passed_img_size_cechk3:
+                
+                passed_img_shorter_side_cechk4 = verify_images_resolution(passed_img_size_cechk3)
+        print("\n Pipeline Completed Successfully!")
+        print(" Final dataset dictionary is ready in memory:")
         for c_name, paths in passed_img_size_cechk3.items():
             print(f"Class '{c_name}' has {len(paths)} ready-to-use images.")
