@@ -1,0 +1,51 @@
+{
+    "step": "discovery",
+    "generated": "2026-10-19T18:59:00",
+    "summary": {
+        "counts": {
+            "PASS": 4,
+            "WARN": 0,
+            "FAIL": 0
+        },
+        "messages": [
+            {
+                "level": "PASS",
+                "text": "Valid JSON: D:\\primary_projects\\grad_cs_sha\\implementation\\demo\\assets\\reports\\validation_report.json"
+            },
+            {
+                "level": "PASS",
+                "text": "'clean_dataset' found"
+            },
+            {
+                "level": "PASS",
+                "text": "5 classes (minimum 2)"
+            },
+            {
+                "level": "PASS",
+                "text": "All listed image files exist"
+            }
+        ]
+    },
+    "data": {
+        "Healthy": {
+            "images": 522,
+            "missing": 0
+        },
+        "Mosaic": {
+            "images": 462,
+            "missing": 0
+        },
+        "RedRot": {
+            "images": 517,
+            "missing": 0
+        },
+        "Rust": {
+            "images": 514,
+            "missing": 0
+        },
+        "Yellow": {
+            "images": 505,
+            "missing": 0
+        }
+    }
+}

@@ -1,6 +1,14 @@
 import os
 import json 
 from pathlib import Path
+import sys
+
+current_dir = Path(__file__).resolve().parent
+phase2_dir = current_dir / "layer_one_validation_layer" / "phase_2_data_statistics"
+sys.path.append(str(phase2_dir))
+
+import step4_run
+
 from src.layer_one_validation_layer.phase_1_files_validation.first_check_one_image.check_image import(
     analyze_and_validate_classes,
     verify_images_deep_integrity,
@@ -20,6 +28,9 @@ from src.layer_one_validation_layer.phase_1_files_validation.second_check_all_im
     CONFIG_PATH,
     valid_images
 )
+
+
+
 
 # Get classes from user 
 def get_class_directories():
@@ -85,7 +96,7 @@ def run_full_pipeline():
     print("      DATASET SETUP & FULL VALIDATION PIPELINE     ")
     print("=" * 65)
 
-    # Read Classes and save it 
+    # 1.Read Classes and save it 
     print("\n[Step 1] Configuring classes and generating config file...")
     stored_dirs = get_class_directories()
     
@@ -100,7 +111,7 @@ def run_full_pipeline():
 
     print(f"\n--- Stored Class Directories Saved Successfully to: ---\n{config_filepath}\n")
 
-    # Check image by image Phase 1 part 1
+    # 2.Check image by image Phase 1 part 1
     print("[Step 2] Running 6-Layer Individual Image Validation...")
     passed_layer1 = analyze_and_validate_classes()
     if not passed_layer1:
@@ -130,7 +141,7 @@ def run_full_pipeline():
     final_clean_dict = verify_images_pixel_variation(passed_layer5)
     print("\n Individual validation checks completed successfully.")
 
-    # Check all images "Advanced checking"
+    # 3.Check all images "Advanced checking"
     print("\n[Step 3] Running Advanced Dataset Checks (Duplicates & pHash)...")
     try:
         classes = load_classes(CONFIG_PATH)
@@ -149,10 +160,11 @@ def run_full_pipeline():
     except Exception as e:
         print(f"Warning during advanced checks: {e}")
 
-    # Final REport
+    # 4.Final REport
     reports_dir = Path(project_root) / "assets" / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
     final_report_path = reports_dir / "final_dataset_report.json"
+    validation_report_path = reports_dir / "validation_report.json"
 
     serializable_dict = {
         class_name: [str(p) for p in paths] 
@@ -167,9 +179,21 @@ def run_full_pipeline():
     with open(final_report_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=4)
 
+    with open(validation_report_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=4)
+
+    print(f"\n Final clean dataset report saved to: {final_report_path}")
+    print(f" Validation report prepared for Phase 2: {validation_report_path}")
+
+    # 5. Run Phase 2 (Statistics, Dimensions, and Final Phase 2 Report)
+    print("\n[Step 4] Running Phase 2 Data Statistics & Dimensions Audit...")
+    failures = step4_run.run_all(str(validation_report_path))
+
     print("\n" + "=" * 65)
-    print(f" FULL PIPELINE FINISHED SUCCESSFULLY!")
-    print(f" Final clean dataset report saved to: {final_report_path}")
+    if failures == 0:
+        print(" FULL PIPELINE (PHASE 1 & PHASE 2) FINISHED SUCCESSFULLY!")
+    else:
+        print(f" PIPELINE FINISHED WITH {failures} WARNING/FAIL ISSUE(S).")
     print("=" * 65)
 
 if __name__ == "__main__":

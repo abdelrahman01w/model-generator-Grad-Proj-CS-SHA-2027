@@ -1,0 +1,50 @@
+{
+    "step": "class_stats",
+    "generated": "2026-10-19T18:59:00",
+    "summary": {
+        "counts": {
+            "PASS": 2,
+            "WARN": 0,
+            "FAIL": 0
+        },
+        "messages": [
+            {
+                "level": "PASS",
+                "text": "Loaded 5 classes and 2520 images from D:\\primary_projects\\grad_cs_sha\\implementation\\demo\\assets\\reports\\validation_report.json"
+            },
+            {
+                "level": "PASS",
+                "text": "Class balance: balanced (max/min = 1.13; thresholds: < 1.5 balanced, <= 3.0 mild, above = significant)"
+            }
+        ]
+    },
+    "data": {
+        "class_stats": {
+            "counts": {
+                "Healthy": 522,
+                "Mosaic": 462,
+                "RedRot": 517,
+                "Rust": 514,
+                "Yellow": 505
+            },
+            "percent": {
+                "Healthy": 20.714285714285715,
+                "Mosaic": 18.333333333333332,
+                "RedRot": 20.515873015873016,
+                "Rust": 20.396825396825395,
+                "Yellow": 20.03968253968254
+            },
+            "total": 2520,
+            "largest": "Healthy",
+            "smallest": "Mosaic",
+            "median": 514,
+            "imbalance_max_min": 1.12987012987013,
+            "imbalance_max_median": 1.0155642023346303,
+            "verdict": "balanced",
+            "thresholds": {
+                "balanced_below": 1.5,
+                "mild_up_to": 3.0
+            }
+        }
+    }
+}

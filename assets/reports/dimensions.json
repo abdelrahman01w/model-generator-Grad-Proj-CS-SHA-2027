@@ -1,0 +1,327 @@
+{
+    "step": "dimensions",
+    "generated": "2026-10-19T18:59:01",
+    "summary": {
+        "counts": {
+            "PASS": 3,
+            "WARN": 2,
+            "FAIL": 0
+        },
+        "messages": [
+            {
+                "level": "PASS",
+                "text": "Loaded 5 classes and 2520 images from D:\\primary_projects\\grad_cs_sha\\implementation\\demo\\assets\\reports\\validation_report.json"
+            },
+            {
+                "level": "PASS",
+                "text": "All images can still be opened (consistent with Phase 1)"
+            },
+            {
+                "level": "WARN",
+                "text": "Sizes are not uniform: 118 different sizes (most common is 493x1040, 38.0% of images). Images will need resizing before training."
+            },
+            {
+                "level": "PASS",
+                "text": "All images use the same color mode: RGB"
+            },
+            {
+                "level": "WARN",
+                "text": "Typical image size differs between classes: Mosaic, Rust are more than 1.5x bigger (in pixels) than Healthy, RedRot, Yellow (largest/smallest = 1.58). A model could learn the image size instead of the disease."
+            }
+        ]
+    },
+    "data": {
+        "per_class": {
+            "Healthy": {
+                "images": 522,
+                "width": {
+                    "min": 493,
+                    "max": 1600,
+                    "mean": 608.6532567049809,
+                    "median": 493.0
+                },
+                "height": {
+                    "min": 493,
+                    "max": 1600,
+                    "mean": 1002.8390804597701,
+                    "median": 1040.0
+                },
+                "aspect_ratio": {
+                    "min": 0.47375,
+                    "max": 2.1108179419525066,
+                    "mean": 0.6861668310737442,
+                    "median": 0.4740384615384615
+                },
+                "median_pixels": 512720.0,
+                "unique_sizes": 13,
+                "most_common_size": [
+                    493,
+                    1040
+                ],
+                "most_common_share": 57.47126436781609,
+                "top_sizes": [
+                    [
+                        493,
+                        1040,
+                        57.47126436781609
+                    ],
+                    [
+                        585,
+                        1040,
+                        17.624521072796934
+                    ],
+                    [
+                        1040,
+                        493,
+                        7.662835249042145
+                    ]
+                ],
+                "modes": {
+                    "RGB": 522
+                }
+            },
+            "Mosaic": {
+                "images": 462,
+                "width": {
+                    "min": 493,
+                    "max": 1600,
+                    "mean": 731.2770562770563,
+                    "median": 780.0
+                },
+                "height": {
+                    "min": 493,
+                    "max": 1600,
+                    "mean": 1001.1666666666666,
+                    "median": 1040.0
+                },
+                "aspect_ratio": {
+                    "min": 0.4740384615384615,
+                    "max": 2.109533468559838,
+                    "mean": 0.8018775276635317,
+                    "median": 0.75
+                },
+                "median_pixels": 811200.0,
+                "unique_sizes": 8,
+                "most_common_size": [
+                    780,
+                    1040
+                ],
+                "most_common_share": 56.926406926406926,
+                "top_sizes": [
+                    [
+                        780,
+                        1040,
+                        56.926406926406926
+                    ],
+                    [
+                        493,
+                        1040,
+                        24.89177489177489
+                    ],
+                    [
+                        1040,
+                        493,
+                        9.307359307359308
+                    ]
+                ],
+                "modes": {
+                    "RGB": 462
+                }
+            },
+            "RedRot": {
+                "images": 517,
+                "width": {
+                    "min": 240,
+                    "max": 1600,
+                    "mean": 667.6131528046421,
+                    "median": 493.0
+                },
+                "height": {
+                    "min": 292,
+                    "max": 1600,
+                    "mean": 933.9187620889749,
+                    "median": 990.0
+                },
+                "aspect_ratio": {
+                    "min": 0.35050071530758226,
+                    "max": 2.5684931506849313,
+                    "mean": 0.8824578788677712,
+                    "median": 0.5
+                },
+                "median_pixels": 512720,
+                "unique_sizes": 89,
+                "most_common_size": [
+                    493,
+                    1040
+                ],
+                "most_common_share": 32.88201160541586,
+                "top_sizes": [
+                    [
+                        493,
+                        1040,
+                        32.88201160541586
+                    ],
+                    [
+                        1040,
+                        493,
+                        11.02514506769826
+                    ],
+                    [
+                        758,
+                        1600,
+                        8.704061895551257
+                    ]
+                ],
+                "modes": {
+                    "RGB": 517
+                }
+            },
+            "Rust": {
+                "images": 514,
+                "width": {
+                    "min": 576,
+                    "max": 1600,
+                    "mean": 811.5622568093386,
+                    "median": 780.0
+                },
+                "height": {
+                    "min": 588,
+                    "max": 1600,
+                    "mean": 1086.0058365758755,
+                    "median": 1040.0
+                },
+                "aspect_ratio": {
+                    "min": 0.45,
+                    "max": 2.17687074829932,
+                    "mean": 0.7867235329809417,
+                    "median": 0.75
+                },
+                "median_pixels": 811200.0,
+                "unique_sizes": 18,
+                "most_common_size": [
+                    780,
+                    1040
+                ],
+                "most_common_share": 61.673151750972764,
+                "top_sizes": [
+                    [
+                        780,
+                        1040,
+                        61.673151750972764
+                    ],
+                    [
+                        1040,
+                        780,
+                        14.007782101167315
+                    ],
+                    [
+                        588,
+                        1280,
+                        9.727626459143968
+                    ]
+                ],
+                "modes": {
+                    "RGB": 514
+                }
+            },
+            "Yellow": {
+                "images": 505,
+                "width": {
+                    "min": 493,
+                    "max": 1600,
+                    "mean": 610.2059405940594,
+                    "median": 493.0
+                },
+                "height": {
+                    "min": 493,
+                    "max": 1600,
+                    "mean": 970.0415841584158,
+                    "median": 1040.0
+                },
+                "aspect_ratio": {
+                    "min": 0.4740384615384615,
+                    "max": 2.109533468559838,
+                    "mean": 0.7500970977110194,
+                    "median": 0.4740384615384615
+                },
+                "median_pixels": 512720,
+                "unique_sizes": 8,
+                "most_common_size": [
+                    493,
+                    1040
+                ],
+                "most_common_share": 73.86138613861387,
+                "top_sizes": [
+                    [
+                        493,
+                        1040,
+                        73.86138613861387
+                    ],
+                    [
+                        1040,
+                        493,
+                        15.247524752475247
+                    ],
+                    [
+                        585,
+                        1040,
+                        4.9504950495049505
+                    ]
+                ],
+                "modes": {
+                    "RGB": 505
+                }
+            }
+        },
+        "overall": {
+            "images": 2520,
+            "width": {
+                "min": 240,
+                "max": 1600,
+                "mean": 684.9285714285714,
+                "median": 588.0
+            },
+            "height": {
+                "min": 292,
+                "max": 1600,
+                "mean": 998.7837301587301,
+                "median": 1040.0
+            },
+            "aspect_ratio": {
+                "min": 0.35050071530758226,
+                "max": 2.5684931506849313,
+                "mean": 0.7809730782825209,
+                "median": 0.5625
+            },
+            "median_pixels": 512720.0,
+            "unique_sizes": 118,
+            "most_common_size": [
+                493,
+                1040
+            ],
+            "most_common_share": 38.01587301587302,
+            "top_sizes": [
+                [
+                    493,
+                    1040,
+                    38.01587301587302
+                ],
+                [
+                    780,
+                    1040,
+                    23.015873015873016
+                ],
+                [
+                    1040,
+                    493,
+                    8.61111111111111
+                ]
+            ],
+            "modes": {
+                "RGB": 2520
+            }
+        },
+        "class_size_ratio": 1.5821501014198782,
+        "unreadable": {}
+    }
+}
