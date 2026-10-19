@@ -12,3 +12,8 @@
 
 # Run Phase 1 part 1:
 `python src/01_validation_layer/phase_1_check_images/02_check_one_image/check_image.py`
+
+
+# Run Phase 2
+
+`src/01_validation_layer/phase_2/step4_run.py`

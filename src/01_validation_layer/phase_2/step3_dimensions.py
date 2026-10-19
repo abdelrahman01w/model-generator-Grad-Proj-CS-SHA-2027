@@ -4,14 +4,14 @@ from collections import Counter
 
 from PIL import Image
 
-from common import Reporter, images_by_class, load_classes, print_table, save_report
+from common import Reporter, load_classes, print_table, save_report
 
 #settings
 STEP_NAME = "dimensions"
-CLASS_SIZE_RATIO_WARN = 1.5  # warn if one class has images 1.5x bigger than another
-LIST_LIMIT = 20              # max number of file paths we print in a list
-ALL = "(all)"                # name of the row that combines every class
-TOP_SIZES = 3                # how many of the most common sizes we show per class
+CLASS_SIZE_RATIO_WARN = 1.5  
+LIST_LIMIT = 20              
+ALL = "(all)"                
+TOP_SIZES = 3                
 
 
 #reading images
@@ -158,19 +158,25 @@ def print_mode_table(summaries):
 
 #checks
 def check_unreadable(rep, unreadable):
-    """FAIL for every image that Pillow could not open."""
+    """FAIL for every listed image that exists but Pillow cannot open.
+
+    load_classes already confirmed that every file in the validation
+    report exists, so a failure here means the file changed after
+    Phase 1 (corrupted, truncated, or replaced), not that it is missing.
+    """
     found_any = False
     for label, paths in unreadable.items():
         if len(paths) == 0:
             continue
         found_any = True
-        rep.fail(f"[{label}] {len(paths)} image(s) could not be opened:")
+        rep.fail(f"[{label}] {len(paths)} image(s) passed Phase 1 but can no longer "
+                 "be opened (file changed or corrupted since validation):")
         for p in paths[:LIST_LIMIT]:
             print(f"         {p}")
         if len(paths) > LIST_LIMIT:
             print(f"         ... and {len(paths) - LIST_LIMIT} more")
     if not found_any:
-        rep.ok("All images could be opened")
+        rep.ok("All images can still be opened (consistent with Phase 1)")
 
 
 def check_size_uniformity(rep, total):
@@ -233,19 +239,17 @@ def run(arg=None):
     """Returns (data, reporter), or (None, reporter) if the input is unusable."""
     rep = Reporter(STEP_NAME)
 
-    # 1. Find the class folders (from classes_config.json by default)
+    # 1. Load the image paths from validation_report.json (default location)
     rep.section("Input")
     classes = load_classes(rep, arg)
     if classes is None:
         rep.summary()
         return None, rep
-    rep.ok(f"Loaded {len(classes)} classes")
 
-    # 2. List the images and read their sizes
-    images = images_by_class(classes)
-    total_files = sum(len(paths) for paths in images.values())
+    # 2. Read the image sizes (classes is already {label: [Path, ...]})
+    total_files = sum(len(paths) for paths in classes.values())
     rep.info(f"Reading the headers of {total_files:,} images...")
-    records, unreadable = collect_dimensions(images)
+    records, unreadable = collect_dimensions(classes)
 
     # 3. Compute statistics per class, and for all classes together
     class_summaries = {}
@@ -289,7 +293,7 @@ def run(arg=None):
         "unreadable": {label: [str(p) for p in paths]
                        for label, paths in unreadable.items() if paths},
     }
-    save_report(rep, classes, data)
+    save_report(rep, data)
     rep.summary()
     return data, rep
 
