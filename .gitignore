@@ -1,46 +1,15 @@
-# Python bytecode / cache
+# Python bytecode & cache
 __pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environments
-venv/
+*.pyc
+*.pyo
+*.pyd
 .venv/
 env/
-ENV/
+venv/
 
-# Environment variables / secrets
-.env
-.env.*
-!.env.example
-
-# Dataset (images are usually too large for GitHub)
-data/*
-!data/.gitkeep
-
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
-.eggs/
-
-# Testing / coverage
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Logs and temp files
-*.log
-*.tmp
-
-# IDE / editor
+# Visual Studio Code settings
 .vscode/
-.idea/
 
-# OS files
-.DS_Store
-Thumbs.db
+# Project Specific: Ignore large dataset and local user configuration
+data/
+assets/classes_config.json
