@@ -515,17 +515,31 @@ if __name__ == "__main__":
             passed_img_size_cechk3 = verfiy_images_size(passed_img_opened_check2)
             
             if passed_img_size_cechk3:
-                
                 passed_img_shorter_side_cechk4 = verify_images_resolution(passed_img_size_cechk3)
         
                 if passed_img_shorter_side_cechk4:
-
                     passed_aspect_ratio_ceck5 = verify_images_aspect_ratio(passed_img_shorter_side_cechk4)
                     
                     if passed_aspect_ratio_ceck5:
-                        
                         final_dataset_dict = verify_images_pixel_variation(passed_aspect_ratio_ceck5)
-        print("\n Full Pipeline Completed Successfully!")
-        print(" Final dataset dictionary is ready in memory:")
-        for c_name, paths in passed_img_size_cechk3.items():
-            print(f"Class '{c_name}' has {len(paths)} ready-to-use images.")
+                        
+                        print("\n Full Pipeline Completed Successfully!")
+                        print(" Final dataset dictionary is ready in memory:")
+                        for c_name, paths in final_dataset_dict.items():
+                            print(f"Class '{c_name}' has {len(paths)} ready-to-use images.")
+
+                       
+                        current_script_path = os.path.dirname(os.path.abspath(__file__))
+                        project_route = current_script_path
+                        for _ in range(4):
+                            project_route = os.path.dirname(project_route)
+
+                        reports_dir = os.path.join(project_route, "assets", "reports")
+                        os.makedirs(reports_dir, exist_ok=True)
+                        report_filepath = os.path.join(reports_dir, "validation_report.json")
+
+                        
+                        with open(report_filepath, "w", encoding="utf-8") as f:
+                            json.dump({"clean_dataset": dict(final_dataset_dict)}, f, indent=4)
+
+                        print(f" Final clean dataset successfully saved to: {report_filepath}")
