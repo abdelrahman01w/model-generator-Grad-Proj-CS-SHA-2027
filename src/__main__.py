@@ -11,6 +11,7 @@ def get_class_directories():
     class_directories = {} # we will use it to track all directories 
     # after get number of classes no we will collect the directories in our dictionary
 
+    entered_names = set()
     entered_paths = set()
     # Get the number of classes
     while True:
@@ -25,8 +26,16 @@ def get_class_directories():
     
     i=0
     while i < num_classes:
-        suggested_path = os.path.join(default_data_dir, f"class_{i}")
-        dir_path = input(f"Enter directory for class {i} [Default: {suggested_path}]: ").strip()
+        print(f"\n--- Configuring Class {i + 1} of {num_classes} ---")
+        class_name = input(f"Enter the name for class {i + 1}: ").strip()
+        if not class_name:
+            print("Error: Class name cannot be empty. Please enter a valid name.")
+            continue
+        if class_name in entered_names:
+            print(f"Warning: The class name '{class_name}' is already entered! Please use a unique name.")
+            continue
+        suggested_path = os.path.join(default_data_dir, class_name)
+        dir_path = input(f"Enter directory for class '{class_name}' [Default: {suggested_path}]: ").strip()        
         
         dir_path = dir_path.strip('"').strip("'") # to remove any quots in pathes
 
@@ -44,8 +53,9 @@ def get_class_directories():
             continue
 
         # if user enter a valid path 
+        entered_names.add(class_name)
         entered_paths.add(dir_path)
-        class_directories[f"class_{i}"] = dir_path
+        class_directories[class_name] = dir_path
         i += 1
     return  class_directories      
 
@@ -65,3 +75,4 @@ if __name__ == "__main__":
         json.dump(stored_dirs, f, indent=4)
 
     print(f"\n--- Stored Class Directories Saved Successfully to: ---\n{config_filepath}")
+
